@@ -13,7 +13,7 @@ spec:
         app: demo
     spec:
       containers:
-      - image: sumitroopchandani/web4 
+      - image: nginx:latest
         imagePullPolicy: Always
         name: app
         resources:
