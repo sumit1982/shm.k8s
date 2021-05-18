@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo 
+spec:
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      name: demo
+      labels:
+        app: demo
+    spec:
+      containers:
+      - image: sumitroopchandani/web4 
+        imagePullPolicy: Always
+        name: app
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "20Mi"
+          limits:
+            cpu: "50m"
+            memory: "512Mi"
+        volumeMounts:
+        - mountPath: /var/www/html 
+          name: www-root
+      volumes:
+      - name: www-root
+        hostPath:
+          path: /var/www/html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: demo
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: demo-ingress
+spec:
+  rules:
+  - host: qa.shmhub.com
+    http:
+      paths:
+      - path: /login
+        backend:
+          serviceName: demo
+          servicePort: 80
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: resize-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: demo 
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+#  - type: Resource
+#    resource:
+#      name: memory
+      #targetAverageUtilization: 50
+#      targetAverageValue: 128Mi
+#---
+#apiVersion: v1
+#kind: LimitRange
+#metadata:
+#  name: demo
+#spec:
+ # limits:
+  #- default: 
+  #    cpu: 50m
+  #    memory: 100Mib
+  #  defaultRequest: 
+  #    cpu: 20m
+  #    memory: 50Mib
+  #- max:
+  #    cpu: 200m
+  #    memory: 512Mib
+  #  min:
+  #    cpu: 10m
+  #    memory: 10Mib  
+  #  type: Container 
+#---
+#apiVersion: v1
+#kind: ResourceQuota
+#metadata:
+#  name: demo
+#spec:
+#  hard:
+#    requests.cpu: 20m
+#    requests.memory: 128Mib
+#    limits.cpu: 200m
+#    limits.memory: 512Mib
+

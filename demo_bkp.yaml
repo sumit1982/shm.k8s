@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      name: demo
+      labels:
+        app: demo
+    spec:
+      containers:
+      - image: sumitroopchandani/web4 
+        imagePullPolicy: Always
+        name: app
+        volumeMounts:
+        - mountPath: /var/www/html 
+          name: www-root
+        - mountPath: /etc/ssl/private
+          name: key-crt
+        - mountPath: etc/nginx/sites-available/
+          name: site-available
+      volumes:
+      - name: www-root
+        hostPath:
+          path: /var/www/html
+      - name: key-crt
+        hostPath:
+          path: /home/ubuntu
+      - name: site-available
+        hostPath:
+          path: /home/ubuntu
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: demo
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: demo-ingress
+spec:
+  rules:
+  - host: qa.shmhub.com
+    http:
+      paths:
+      - path: /login
+        backend:
+          serviceName: demo
+          servicePort: 80
+

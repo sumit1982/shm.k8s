@@ -1,0 +1,36 @@
+server {
+        listen 80 default_server;
+        listen 443 ssl http2 default_server;
+
+        root /var/www/html/public;
+
+        # Add index.php to the list if you are using PHP
+        index index.php index.html index.htm index.nginx-debian.html;
+
+        server_name shmhub.com;
+        #return 302 https://$server_name$request_uri;
+	      ssl_certificate     /etc/ssl/private/shmhub.com.crt;
+    	  ssl_certificate_key /etc/ssl/private/shmhub.com.key;
+
+        location / {
+                # First attempt to serve request as file, then
+                # as directory, then fall back to displaying a 404.
+                #try_files $uri $uri/ =404;
+                 try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+		fastcgi_read_timeout 600;
+        }
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        location ~ /\.ht {
+                deny all;
+        }
+}
