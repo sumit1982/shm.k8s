@@ -13,7 +13,7 @@ spec:
         app: demo
     spec:
       containers:
-      - image: nginx:latest
+      - image: alpine:latest
         imagePullPolicy: Always
         name: app
         resources:
